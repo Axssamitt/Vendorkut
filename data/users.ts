@@ -1,0 +1,70 @@
+import type { User } from "@/types/database"
+
+export const sampleUsers: User[] = [
+  {
+    id: "user_1",
+    firstName: "Admin",
+    lastName: "User",
+    email: "admin@vendorkut.com",
+    password: "admin123", // In a real app, this would be hashed
+    document: "123.456.789-00",
+    documentType: "cpf",
+    role: "admin",
+    permissions: [
+      "view_products",
+      "create_products",
+      "edit_products",
+      "delete_products",
+      "manage_users",
+      "approve_users",
+      "approve_products",
+      "manage_orders",
+      "manage_communities",
+    ],
+    status: "approved",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "user_2",
+    firstName: "Seller",
+    lastName: "User",
+    email: "seller@vendorkut.com",
+    password: "seller123", // In a real app, this would be hashed
+    document: "987.654.321-00",
+    documentType: "cpf",
+    role: "seller",
+    permissions: ["view_products", "create_products", "edit_products", "manage_orders"],
+    status: "approved",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "user_3",
+    firstName: "Regular",
+    lastName: "User",
+    email: "user@vendorkut.com",
+    password: "user123", // In a real app, this would be hashed
+    document: "111.222.333-44",
+    documentType: "cpf",
+    role: "user",
+    permissions: ["view_products"],
+    status: "approved",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "user_4",
+    firstName: "Pending",
+    lastName: "User",
+    email: "pending@vendorkut.com",
+    password: "pending123", // In a real app, this would be hashed
+    document: "555.666.777-88",
+    documentType: "cpf",
+    role: "user",
+    permissions: [],
+    status: "pending",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+]

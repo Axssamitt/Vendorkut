@@ -9,20 +9,42 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { useAuth } from "@/contexts/auth-context"
+import { useToast } from "@/hooks/use-toast"
 
 export default function LoginPage() {
   const router = useRouter()
+  const { login } = useAuth()
+  const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setError("")
 
-    // Simulando login
-    setTimeout(() => {
-      setIsLoading(false)
+    try {
+      await login(email, password)
+      toast({
+        title: "Login bem-sucedido",
+        description: "Você foi autenticado com sucesso.",
+        variant: "default",
+      })
       router.push("/")
-    }, 1500)
+    } catch (error) {
+      console.error("Login error:", error)
+      setError(error instanceof Error ? error.message : "Falha na autenticação. Verifique suas credenciais.")
+      toast({
+        title: "Erro de login",
+        description: error instanceof Error ? error.message : "Falha na autenticação. Verifique suas credenciais.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -34,9 +56,17 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && <div className="p-3 text-sm bg-red-50 text-red-600 rounded-md">{error}</div>}
             <div className="space-y-2">
               <Label htmlFor="email">E-mail</Label>
-              <Input id="email" type="email" placeholder="seu@email.com" required />
+              <Input
+                id="email"
+                type="email"
+                placeholder="seu@email.com"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -45,7 +75,13 @@ export default function LoginPage() {
                   Esqueceu a senha?
                 </Link>
               </div>
-              <Input id="password" type="password" required />
+              <Input
+                id="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
             <Button type="submit" className="w-full orkut-button" disabled={isLoading}>
               {isLoading ? "Entrando..." : "Entrar"}

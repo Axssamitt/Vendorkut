@@ -1,8 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
-import { Bell, Menu, Search, ShoppingCart } from "lucide-react"
+import { Bell, Menu, Search, ShoppingCart, ShieldAlert } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -15,9 +14,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { useAuth } from "@/contexts/auth-context"
+import { useCart } from "@/contexts/cart-context"
 
 export default function Header() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const { user, logout, isAdmin } = useAuth()
+  const { totalItems } = useCart()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -59,34 +61,45 @@ export default function Header() {
           <Link href="/carrinho">
             <Button variant="ghost" size="icon" className="relative">
               <ShoppingCart className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                3
-              </span>
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {totalItems}
+                </span>
+              )}
               <span className="sr-only">Carrinho</span>
             </Button>
           </Link>
 
-          {isLoggedIn ? (
+          {user ? (
             <>
               <Button variant="ghost" size="icon">
                 <Bell className="h-5 w-5" />
                 <span className="sr-only">Notificações</span>
               </Button>
 
+              {isAdmin() && (
+                <Link href="/admin">
+                  <Button variant="ghost" size="icon" className="text-red-500">
+                    <ShieldAlert className="h-5 w-5" />
+                    <span className="sr-only">Admin</span>
+                  </Button>
+                </Link>
+              )}
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src="/placeholder-user.jpg" alt="Usuário" />
-                      <AvatarFallback>MJ</AvatarFallback>
+                      <AvatarImage src="/placeholder-user.jpg" alt={`${user.firstName} ${user.lastName}`} />
+                      <AvatarFallback>{`${user.firstName.charAt(0)}${user.lastName.charAt(0)}`}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">Maria Joaquina</p>
-                      <p className="text-xs leading-none text-muted-foreground">maria@exemplo.com</p>
+                      <p className="text-sm font-medium leading-none">{`${user.firstName} ${user.lastName}`}</p>
+                      <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -105,13 +118,15 @@ export default function Header() {
                       Minhas Comunidades
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Link href="/admin" className="flex w-full">
-                      Painel Administrativo
-                    </Link>
-                  </DropdownMenuItem>
+                  {isAdmin() && (
+                    <DropdownMenuItem>
+                      <Link href="/admin" className="flex w-full">
+                        Painel Administrativo
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setIsLoggedIn(false)}>Sair</DropdownMenuItem>
+                  <DropdownMenuItem onClick={logout}>Sair</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </>
@@ -136,6 +151,8 @@ export default function Header() {
 }
 
 function MobileNav() {
+  const { user, isAdmin } = useAuth()
+
   return (
     <div className="flex flex-col h-full">
       <div className="px-7 py-4 border-b">
@@ -159,12 +176,24 @@ function MobileNav() {
         <Link href="/comunidades" className="flex items-center gap-2 text-sm font-medium hover:text-primary py-2">
           Comunidades
         </Link>
-        <Link href="/perfil" className="flex items-center gap-2 text-sm font-medium hover:text-primary py-2">
-          Meu Perfil
-        </Link>
-        <Link href="/pedidos" className="flex items-center gap-2 text-sm font-medium hover:text-primary py-2">
-          Meus Pedidos
-        </Link>
+        {user && (
+          <>
+            <Link href="/perfil" className="flex items-center gap-2 text-sm font-medium hover:text-primary py-2">
+              Meu Perfil
+            </Link>
+            <Link href="/pedidos" className="flex items-center gap-2 text-sm font-medium hover:text-primary py-2">
+              Meus Pedidos
+            </Link>
+            <Link href="/carrinho" className="flex items-center gap-2 text-sm font-medium hover:text-primary py-2">
+              Meu Carrinho
+            </Link>
+            {isAdmin() && (
+              <Link href="/admin" className="flex items-center gap-2 text-sm font-medium hover:text-primary py-2">
+                Painel Administrativo
+              </Link>
+            )}
+          </>
+        )}
       </nav>
     </div>
   )
